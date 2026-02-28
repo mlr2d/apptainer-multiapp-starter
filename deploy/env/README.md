@@ -6,6 +6,7 @@ Each file in this folder (`*.env`) describes one service runtime configuration.
 - `SERVICE_NAME` (example: `app1`)
 - `SERVICE_PORT` (example: `8071`)
 - `URL_PREFIX` (example: `/app1`)
+- `DATA_BIND` (example: `/home/sankaran2/apps/apptainer-multiapp-starter/data/app1:/data`)
 - `GUNICORN_WORKERS` (example: `1`)
 - `GUNICORN_THREADS` (example: `2`)
 
@@ -19,5 +20,8 @@ Runtime injection:
 - `GUNICORN_WORKERS` -> `APPTAINERENV_GUNICORN_WORKERS`
 - `GUNICORN_THREADS` -> `APPTAINERENV_GUNICORN_THREADS`
 - `SERVICE_PORT` is passed as the container start argument.
+
+Runtime bind:
+- `DATA_BIND` is passed directly to `--bind`.
 
 Keep `SERVICE_NAME` aligned with folder/image naming to avoid script changes.

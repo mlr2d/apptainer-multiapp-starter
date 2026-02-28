@@ -42,6 +42,7 @@ Required keys:
 - `SERVICE_NAME`
 - `SERVICE_PORT`
 - `URL_PREFIX`
+- `DATA_BIND`
 - `GUNICORN_WORKERS`
 - `GUNICORN_THREADS`
 
@@ -49,7 +50,10 @@ Naming convention used by scripts:
 - image path: `services/$SERVICE_NAME/$SERVICE_NAME.sif`
 - instance name: `$SERVICE_NAME`
 
-At start time, scripts pass these values into the container via `APPTAINERENV_*` (for `URL_PREFIX`, `GUNICORN_WORKERS`, `GUNICORN_THREADS`) and pass the port as the start argument.
+At start time:
+- scripts pass `URL_PREFIX`, `GUNICORN_WORKERS`, and `GUNICORN_THREADS` via `APPTAINERENV_*`
+- scripts bind `DATA_BIND` (`host_path:container_path`) with `--bind "$DATA_BIND"`
+- scripts pass the service port as the start argument
 
 ## Basic workflow
 ```bash
@@ -73,7 +77,7 @@ Start one service:
 ```bash
 cd /home/sankaran2/apps/apptainer-multiapp-starter/services/app1
 apptainer build app1.sif Apptainer.def
-APPTAINERENV_URL_PREFIX=/app1 APPTAINERENV_GUNICORN_WORKERS=1 APPTAINERENV_GUNICORN_THREADS=2 apptainer run app1.sif 8071
+APPTAINERENV_URL_PREFIX=/app1 APPTAINERENV_GUNICORN_WORKERS=1 APPTAINERENV_GUNICORN_THREADS=2 apptainer run --bind /home/sankaran2/apps/apptainer-multiapp-starter/data/app1:/data app1.sif 8071
 ```
 
 ## Reverse proxy and systemd
