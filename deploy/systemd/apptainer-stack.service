@@ -1,0 +1,14 @@
+[Unit]
+Description=Apptainer Flask Stack (dashboard + apps)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/home/sankaran2/apps/test3
+ExecStart=/home/sankaran2/apps/test3/scripts/start-all.sh
+ExecStop=/home/sankaran2/apps/test3/scripts/stop-all.sh
+
+[Install]
+WantedBy=multi-user.target

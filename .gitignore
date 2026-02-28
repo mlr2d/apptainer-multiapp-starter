@@ -1,0 +1,9 @@
+# Apptainer images
+*.sif
+
+# Apptainer temporary/scratch artifacts
+apptainer-build-tmp-*
+
+# Python cache
+__pycache__/
+*.pyc

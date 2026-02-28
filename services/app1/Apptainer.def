@@ -1,0 +1,21 @@
+Bootstrap: docker
+From: python:3.11-slim
+
+%post
+    python -m pip install --no-cache-dir --upgrade pip
+    python -m pip install --no-cache-dir -r /opt/app/requirements.txt
+
+%files
+    app /opt/app/app
+    wsgi.py /opt/app/wsgi.py
+    requirements.txt /opt/app/requirements.txt
+    entrypoint.sh /opt/app/entrypoint.sh
+
+%environment
+    export PYTHONUNBUFFERED=1
+
+%runscript
+    exec /opt/app/entrypoint.sh "$@"
+
+%startscript
+    exec /opt/app/entrypoint.sh "$@"
