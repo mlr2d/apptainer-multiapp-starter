@@ -1,41 +1,22 @@
-# test3: Multi-App Apptainer Stack with Prefix Routing
+# Apptainer Multi-App Starter
 
-This setup demonstrates a production-style organization for multiple Flask apps running as separate Apptainer instances, with path-prefix routing (for example `www.xxx.de/app1`, `www.xxx.de/app2`).
+Template repository for running multiple Flask services as separate Apptainer instances, with optional path-based routing through Apache httpd.
 
-## What is industry-standard for Apptainer?
-There is no single widely adopted, first-party "docker-compose equivalent" for Apptainer in production.
+## Why this layout
+This repository uses a simple pattern that scales from local testing to server deployment:
+1. One service directory per app (`services/<service>`).
+2. One Apptainer image (`.sif`) and one instance per app.
+3. One env file per app (`deploy/env/<service>.env`) as runtime configuration.
+4. One reverse proxy layer for URL-prefix routing (`/dashboard`, `/app1`, `/app2`).
+5. Optional systemd unit for start/stop at system level.
 
-Common production pattern:
-1. Build one `.sif` image per app.
-2. Run each app as an Apptainer instance.
-3. Manage lifecycle with `systemd` (or scheduler in HPC environments).
-4. Put an HTTP reverse proxy (Apache/Nginx/Traefik) in front for domain/path routing and TLS.
-5. Keep runtime config in env files (`.env` style), not hardcoded in `Apptainer.def`.
-
-This repository follows that pattern.
-
-## Layout
+## Repository structure
 ```text
-/home/sankaran2/apps/test3
+/home/sankaran2/apps/apptainer-multiapp-starter
 ├── services
 │   ├── dashboard
-│   │   ├── app/
-│   │   ├── Apptainer.def
-│   │   ├── entrypoint.sh
-│   │   ├── requirements.txt
-│   │   └── wsgi.py
 │   ├── app1
-│   │   ├── app/
-│   │   ├── Apptainer.def
-│   │   ├── entrypoint.sh
-│   │   ├── requirements.txt
-│   │   └── wsgi.py
 │   └── app2
-│       ├── app/
-│       ├── Apptainer.def
-│       ├── entrypoint.sh
-│       ├── requirements.txt
-│       └── wsgi.py
 ├── deploy
 │   ├── env
 │   │   ├── dashboard.env
@@ -54,29 +35,25 @@ This repository follows that pattern.
     └── stop-one.sh
 ```
 
-## Config model
-- Per-service runtime config is in `deploy/env/<service>.env`.
-- Required keys per app: `SERVICE_NAME`, `SERVICE_PORT`, `URL_PREFIX`, `GUNICORN_WORKERS`, `GUNICORN_THREADS`.
-- Scripts assume naming convention from `SERVICE_NAME`:
-  - image path: `services/$SERVICE_NAME/$SERVICE_NAME.sif`
-  - instance name: `$SERVICE_NAME`
-- `Apptainer.def` files are generic and **do not** hardcode ports.
-- Ports are passed as runtime arguments to instance start.
-- `URL_PREFIX`, `GUNICORN_WORKERS`, and `GUNICORN_THREADS` are injected using `APPTAINERENV_*` variables.
+## Runtime configuration model
+Each service has one env file under `deploy/env/`.
 
-## Independent repo model
-Each folder under `services/*` can be its own git repo:
-- app code + `wsgi.py` + `requirements.txt` + `Apptainer.def` + `entrypoint.sh`
-- build/run independently:
-```bash
-cd services/app1
-apptainer build app1.sif Apptainer.def
-APPTAINERENV_URL_PREFIX=/app1 APPTAINERENV_GUNICORN_WORKERS=1 APPTAINERENV_GUNICORN_THREADS=2 apptainer run app1.sif 8071
-```
+Required keys:
+- `SERVICE_NAME`
+- `SERVICE_PORT`
+- `URL_PREFIX`
+- `GUNICORN_WORKERS`
+- `GUNICORN_THREADS`
 
-## Stack usage
+Naming convention used by scripts:
+- image path: `services/$SERVICE_NAME/$SERVICE_NAME.sif`
+- instance name: `$SERVICE_NAME`
+
+At start time, scripts pass these values into the container via `APPTAINERENV_*` (for `URL_PREFIX`, `GUNICORN_WORKERS`, `GUNICORN_THREADS`) and pass the port as the start argument.
+
+## Basic workflow
 ```bash
-cd /home/sankaran2/apps/test3
+cd /home/sankaran2/apps/apptainer-multiapp-starter
 ./scripts/build-all.sh
 ./scripts/start-all.sh
 ./scripts/status-all.sh
@@ -92,17 +69,19 @@ Start one service:
 ./scripts/start-one.sh app1
 ```
 
-## Reverse proxy
-Use `deploy/reverse-proxy/httpd-vhost.conf` as the Apache path-routing template:
-- `/dashboard` -> dashboard service
-- `/app1` -> app1 service
-- `/app2` -> app2 service
+## Running a single service independently
+```bash
+cd /home/sankaran2/apps/apptainer-multiapp-starter/services/app1
+apptainer build app1.sif Apptainer.def
+APPTAINERENV_URL_PREFIX=/app1 APPTAINERENV_GUNICORN_WORKERS=1 APPTAINERENV_GUNICORN_THREADS=2 apptainer run app1.sif 8071
+```
 
-This enables URLs like:
-- `https://www.xxx.de/dashboard`
-- `https://www.xxx.de/app1`
-- `https://www.xxx.de/app2`
+## Reverse proxy and systemd
+- Apache httpd template: `deploy/reverse-proxy/httpd-vhost.conf`
+- systemd unit template: `deploy/systemd/apptainer-stack.service`
+
+See the README files in those folders for deployment details.
 
 ## Notes
-- Path-prefix behavior is app-aware via `URL_PREFIX` env var.
-- If your environment restricts rootless container networking, run instances in host network mode (default without `--net`) and let reverse proxy handle external routing.
+- `Apptainer.def` files are intentionally generic and do not hardcode ports.
+- Host-network mode (no `--net`) is typically the simplest non-root setup.

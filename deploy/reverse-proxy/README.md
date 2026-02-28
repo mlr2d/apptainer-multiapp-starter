@@ -1,30 +1,36 @@
 # Reverse Proxy (Apache httpd)
 
-This folder contains Apache reverse-proxy configuration for routing URL prefixes to Apptainer services.
+This folder contains Apache configuration for routing URL prefixes to local Apptainer services.
 
-## Files
-- `httpd-vhost.conf`: VirtualHost template for `www.xxx.de`.
+## File
+- `httpd-vhost.conf`: example VirtualHost for `www.xxx.de`
 
-## What it does
-- Routes `/dashboard` to dashboard service port.
-- Routes `/app1` to app1 service port.
-- Routes `/app2` to app2 service port.
+## Routing model
+- `/dashboard` -> dashboard service port
+- `/app1` -> app1 service port
+- `/app2` -> app2 service port
 
 ## Prerequisites
-Enable Apache modules:
+Enable required Apache modules:
+
+Debian/Ubuntu:
 ```bash
 sudo a2enmod proxy proxy_http headers
 ```
 
-## Deploy steps
+RHEL/Rocky/Alma:
+- Ensure proxy modules are loaded in Apache config (`mod_proxy`, `mod_proxy_http`, `mod_headers`).
+
+## Deployment steps
 1. Copy or include `httpd-vhost.conf` in your Apache site config.
-2. Adjust domain and ports to match `deploy/env/*.env`.
+2. Adjust domain, prefixes, and ports to match `deploy/env/*.env`.
 3. Reload Apache:
 ```bash
 sudo systemctl reload httpd
 ```
 (Use `apache2` instead of `httpd` on Debian/Ubuntu if needed.)
 
-## Notes
-- URL prefixes in Apache must match each app's `URL_PREFIX` in `deploy/env/*.env`.
-- Ports in Apache must match each app's `SERVICE_PORT`.
+## Validation checklist
+- Prefixes in Apache match each service `URL_PREFIX`.
+- Backend ports in Apache match each service `SERVICE_PORT`.
+- Apptainer instances are running before Apache routes traffic.
