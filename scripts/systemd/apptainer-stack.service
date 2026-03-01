@@ -1,0 +1,14 @@
+[Unit]
+Description=Apptainer Service Stack (main + pigeon services)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/home/sankaran2/apps/apptainer-multiapp-starter
+ExecStart=/home/sankaran2/apps/apptainer-multiapp-starter/scripts/start-all.sh
+ExecStop=/home/sankaran2/apps/apptainer-multiapp-starter/scripts/stop-all.sh
+
+[Install]
+WantedBy=multi-user.target

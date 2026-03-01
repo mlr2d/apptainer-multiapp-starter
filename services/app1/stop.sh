@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 set -euo pipefail
-cd "$(dirname "$0")/.."
-source "deploy/env/$1.env"
+cd "$(dirname "$0")"
+source ./config.env
 apptainer instance stop "$SERVICE_NAME"
