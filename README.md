@@ -1,6 +1,13 @@
-# Apps Dashboard Apptainer Template
+# Apptainer Multi-App Starter
 
-Multi-service Apptainer template aligned with the `apps-dashboard` folder layout.
+Generic template for running multiple Flask services as independent Apptainer instances.
+
+## Overview
+This repository uses a simple, repeatable structure:
+- each service has its own folder under `services/`
+- each service builds one `.sif` image
+- each service runs as one Apptainer instance
+- top-level scripts manage build/start/stop/status for all services
 
 ## Structure
 ```text
@@ -28,25 +35,11 @@ Multi-service Apptainer template aligned with the `apps-dashboard` folder layout
     │   ├── requirements.txt
     │   └── wsgi.py
     ├── app1
-    │   ├── app/
-    │   ├── Apptainer.def
-    │   ├── build.sh
-    │   ├── config.env
-    │   ├── start.sh
-    │   ├── stop.sh
-    │   └── wsgi.py
     └── app2
-        ├── app/
-        ├── Apptainer.def
-        ├── build.sh
-        ├── config.env
-        ├── start.sh
-        ├── stop.sh
-        └── wsgi.py
 ```
 
-## Service config model
-Each service owns its runtime config at `services/<service>/config.env`.
+## Service configuration
+Each service defines runtime config in `services/<service>/config.env`.
 
 Required keys:
 - `SERVICE_NAME`
@@ -56,30 +49,23 @@ Required keys:
 - `APPTAINERENV_GUNICORN_WORKERS`
 - `APPTAINERENV_GUNICORN_THREADS`
 
-## Run
+## Usage
 ```bash
 cd /home/sankaran2/apps/apptainer-multiapp-starter
 ./scripts/build-all.sh
 ./scripts/start-all.sh
 ./scripts/status-all.sh
-```
-
-Stop all:
-```bash
 ./scripts/stop-all.sh
 ```
 
-Run one service:
+Single service example:
 ```bash
+./services/app1/build.sh
 ./services/app1/start.sh
-```
-
-Stop one service:
-```bash
 ./services/app1/stop.sh
 ```
 
 ## Notes
-- Scripts discover services via `services/*/config.env`.
-- `Apptainer.def` files are generic; runtime values come from `config.env`.
-- Data mounts are passed through `DATA_BIND`.
+- `Apptainer.def` files remain generic; runtime values come from `config.env`.
+- Data mounts are controlled through `DATA_BIND`.
+- Use the reverse-proxy and systemd templates under `scripts/` for production-style deployments.

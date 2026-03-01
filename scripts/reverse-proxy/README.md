@@ -1,18 +1,18 @@
 # Reverse Proxy (Apache httpd)
 
-Apache vhost template for path-prefix routing to local Apptainer services.
+Apache VirtualHost template for path-based routing to local Apptainer services.
 
 ## File
 - `httpd-vhost.conf`
 
-## Routing
+## Routing model
 - `/main` -> `main` service
 - `/app1` -> `app1` service
 - `/app2` -> `app2` service
 
 ## Setup
-1. Copy/include `httpd-vhost.conf` in Apache config.
-2. Ensure prefixes and ports match each service `config.env`.
+1. Include `httpd-vhost.conf` in Apache site configuration.
+2. Match paths/ports to each service `config.env`.
 3. Reload Apache:
 ```bash
 sudo systemctl reload httpd

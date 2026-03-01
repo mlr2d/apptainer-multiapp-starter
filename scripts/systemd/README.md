@@ -1,10 +1,10 @@
 # systemd Integration
 
-Systemd unit for starting and stopping the full stack using:
+Template unit for managing the full Apptainer stack with:
 - `scripts/start-all.sh`
 - `scripts/stop-all.sh`
 
-## Install (system-wide)
+## System-wide install
 ```bash
 sudo cp /home/sankaran2/apps/apptainer-multiapp-starter/scripts/systemd/apptainer-stack.service /etc/systemd/system/
 sudo systemctl daemon-reload
@@ -13,7 +13,7 @@ sudo systemctl start apptainer-stack
 sudo systemctl status apptainer-stack
 ```
 
-## Install (per-user)
+## Per-user install
 ```bash
 mkdir -p ~/.config/systemd/user
 cp /home/sankaran2/apps/apptainer-multiapp-starter/scripts/systemd/apptainer-stack.service ~/.config/systemd/user/
